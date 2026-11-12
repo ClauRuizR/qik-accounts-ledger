@@ -1,0 +1,13 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+"""
+Decimal number serialized as a string to avoid floating-point errors, e.g. "100.50"
+"""
+scalar Decimal
+
+type Query {
+  """Liveness probe for the GraphQL endpoint."""
+  health: String!
+}
