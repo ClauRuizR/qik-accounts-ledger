@@ -4,7 +4,7 @@
   "private": true,
   "description": "Qik Banco Digital — Accounts & Ledger Service (NestJS API + Expo mobile app)",
   "scripts": {
-    "setup": "npm --prefix apps/api install && npm --prefix apps/mobile install",
+    "setup": "npm --prefix apps/api ci && npm --prefix apps/mobile ci",
     "db:up": "docker compose up -d --wait",
     "db:down": "docker compose down",
     "db:migrate": "npm --prefix apps/api run migration:run",
@@ -17,5 +17,8 @@
     "type": "git",
     "url": "git+https://github.com/ClauRuizR/qik-accounts-ledger.git"
   },
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "engines": {
+    "node": "^22.13.0 || ^24.3.0"
+  }
 }
