@@ -1,3 +1,4 @@
+import { Public } from '../../common/auth/public.decorator.js';
 import { Controller, Get, HttpStatus, Res } from '@nestjs/common';
 import {
   ApiOkResponse,
@@ -13,6 +14,7 @@ export class HealthStatusDto {
 }
 
 @ApiTags('health')
+@Public()
 @Controller('health')
 export class HealthController {
   constructor(private readonly dataSource: DataSource) {}

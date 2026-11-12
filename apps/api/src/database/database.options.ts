@@ -1,13 +1,14 @@
 import type { DataSourceOptions } from 'typeorm';
 import type { AppConfig } from '../config/env.js';
-import { ORM_ENTITIES } from './entities.js';
 import { MIGRATIONS } from './migrations/index.js';
 
 /**
  * Single source of truth for TypeORM connection options, shared by the Nest
- * app, the TypeORM CLI and the integration tests. Migrations and entities are
- * listed explicitly (no globs) so they resolve identically from `src/` under
- * Vitest and from `dist/` at runtime.
+ * app, the TypeORM CLI and the integration tests. Migrations are listed
+ * explicitly (no globs) so they resolve identically from `src/` under Vitest
+ * and from `dist/` at runtime. ORM entities are registered by each module via
+ * `TypeOrmModule.forFeature` (`autoLoadEntities`); migrations are hand-written
+ * SQL, so the CLI does not need them.
  */
 export function buildDataSourceOptions(config: AppConfig): DataSourceOptions {
   return {
@@ -17,7 +18,6 @@ export function buildDataSourceOptions(config: AppConfig): DataSourceOptions {
     username: config.DATABASE_USER,
     password: config.DATABASE_PASSWORD,
     database: config.DATABASE_NAME,
-    entities: ORM_ENTITIES,
     migrations: MIGRATIONS,
     synchronize: false,
     migrationsRun: false,

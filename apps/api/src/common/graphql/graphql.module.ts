@@ -1,8 +1,10 @@
 import { ApolloDriver, type ApolloDriverConfig } from '@nestjs/apollo';
 import { Module } from '@nestjs/common';
+import { APP_FILTER } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
 import { APP_CONFIG, type AppConfig } from '../../config/env.js';
 import { DecimalScalar } from './decimal.scalar.js';
+import { DomainErrorFilter } from './domain-error.filter.js';
 import { formatGraphQLError } from './format-graphql-error.js';
 
 @Module({
@@ -25,6 +27,9 @@ import { formatGraphQLError } from './format-graphql-error.js';
       }),
     }),
   ],
-  providers: [DecimalScalar],
+  providers: [
+    DecimalScalar,
+    { provide: APP_FILTER, useClass: DomainErrorFilter },
+  ],
 })
 export class AppGraphQLModule {}

@@ -27,4 +27,4 @@ Nest's packages are ESM only, and this project is ESM too: relative imports end 
 
 - Lint with ESLint (`npm run lint`), format with Prettier (`npm run format`). NestJS Observe was intentionally removed.
 - Unit tests: `npm test` (`src/**/*.spec.ts`). Integration tests: `npm run test:e2e` (`test/**/*.e2e-spec.ts`, real PostgreSQL from root `docker compose`).
-- New migrations must be registered in `src/database/migrations/index.ts`; new ORM entities in `src/database/entities.ts`.
+- New migrations must be registered in `src/database/migrations/index.ts`. ORM entities are auto-loaded from each module's `TypeOrmModule.forFeature`.

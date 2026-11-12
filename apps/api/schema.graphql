@@ -2,12 +2,89 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Account {
+  """12-digit account number with a Luhn check digit."""
+  accountNumber: String!
+  balance: Decimal!
+  createdAt: DateTime!
+  currency: Currency!
+  id: ID!
+  status: AccountStatus!
+  updatedAt: DateTime!
+}
+
+type AccountBalance {
+  accountId: ID!
+
+  """Timestamp of the last change to this balance."""
+  asOf: DateTime!
+  balance: Decimal!
+  currency: Currency!
+}
+
+enum AccountStatus {
+  ACTIVE
+  INACTIVE
+}
+
+type AuthPayload {
+  """JWT to send as `Authorization: Bearer <token>`."""
+  accessToken: String!
+  user: User!
+}
+
+input CreateAccountInput {
+  currency: Currency = DOP
+}
+
+enum Currency {
+  DOP
+  EUR
+  USD
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
 """
 Decimal number serialized as a string to avoid floating-point errors, e.g. "100.50"
 """
 scalar Decimal
 
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type Mutation {
+  createAccount(input: CreateAccountInput): Account!
+  login(input: LoginInput!): AuthPayload!
+  register(input: RegisterInput!): AuthPayload!
+}
+
 type Query {
+  account(id: ID!): Account!
+  accountBalance(accountId: ID!): AccountBalance!
+
   """Liveness probe for the GraphQL endpoint."""
   health: String!
+  me: User!
+
+  """The authenticated user's accounts."""
+  myAccounts: [Account!]!
+}
+
+input RegisterInput {
+  email: String!
+
+  """8–128 characters."""
+  password: String!
+}
+
+type User {
+  createdAt: DateTime!
+  email: String!
+  id: ID!
 }
