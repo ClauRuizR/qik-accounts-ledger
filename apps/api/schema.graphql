@@ -1,0 +1,187 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Account {
+  """12-digit account number with a Luhn check digit."""
+  accountNumber: String!
+  balance: Decimal!
+  createdAt: DateTime!
+  currency: Currency!
+  id: ID!
+  status: AccountStatus!
+  updatedAt: DateTime!
+}
+
+type AccountBalance {
+  accountId: ID!
+
+  """Timestamp of the last change to this balance."""
+  asOf: DateTime!
+  balance: Decimal!
+  currency: Currency!
+}
+
+enum AccountStatus {
+  ACTIVE
+  INACTIVE
+}
+
+type AuthPayload {
+  """JWT to send as `Authorization: Bearer <token>`."""
+  accessToken: String!
+  user: User!
+}
+
+type BalancePoint {
+  at: DateTime!
+  balance: Decimal!
+}
+
+type BalanceSummary {
+  accountId: ID!
+  currency: Currency!
+  currentBalance: Decimal!
+
+  """Most recent balance points (oldest first), up to 100."""
+  history(limit: Int! = 30): [BalancePoint!]!
+  totalCredits: Decimal!
+  totalDebits: Decimal!
+  transactionCount: Int!
+}
+
+input CreateAccountInput {
+  currency: Currency = DOP
+}
+
+enum Currency {
+  DOP
+  EUR
+  USD
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+"""
+Decimal number serialized as a string to avoid floating-point errors, e.g. "100.50"
+"""
+scalar Decimal
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type Mutation {
+  createAccount(input: CreateAccountInput): Account!
+
+  """Increases the account balance."""
+  creditAccount(input: PostTransactionInput!): Transaction!
+
+  """
+  Decreases the account balance. Fails with INSUFFICIENT_FUNDS on overdraft.
+  """
+  debitAccount(input: PostTransactionInput!): Transaction!
+  login(input: LoginInput!): AuthPayload!
+  register(input: RegisterInput!): AuthPayload!
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+}
+
+input PostTransactionInput {
+  accountId: ID!
+
+  """Positive amount with at most 2 decimals, as a string: "150.25"."""
+  amount: Decimal!
+  description: String
+
+  """
+  Client-generated key (e.g. a UUID). Retrying with the same key returns the original transaction instead of posting twice.
+  """
+  idempotencyKey: String
+}
+
+type Query {
+  account(id: ID!): Account!
+  accountBalance(accountId: ID!): AccountBalance!
+
+  """Current balance, totals and recent balance history (cached in Redis)."""
+  accountBalanceSummary(accountId: ID!): BalanceSummary!
+
+  """Paginated, filterable transaction history of an owned account."""
+  accountTransactions(accountId: ID!, filters: TransactionFilterInput): TransactionConnection!
+
+  """Liveness probe for the GraphQL endpoint."""
+  health: String!
+  me: User!
+
+  """The authenticated user's accounts."""
+  myAccounts: [Account!]!
+}
+
+input RegisterInput {
+  email: String!
+
+  """8–128 characters."""
+  password: String!
+}
+
+"""Ordering by creation date (ties broken by posting sequence)."""
+enum SortOrder {
+  ASC
+  DESC
+}
+
+"""A posted, immutable ledger entry."""
+type Transaction {
+  accountId: ID!
+  amount: Decimal!
+
+  """Account balance right after this entry."""
+  balanceAfter: Decimal!
+  createdAt: DateTime!
+  description: String!
+  id: ID!
+  type: TransactionType!
+}
+
+type TransactionConnection {
+  items: [Transaction!]!
+  pageInfo: PageInfo!
+
+  """Total matching the filters (ignores pagination)."""
+  totalCount: Int!
+}
+
+input TransactionFilterInput {
+  """endCursor from the previous page."""
+  after: String
+
+  """Inclusive upper bound on createdAt."""
+  endDate: DateTime
+
+  """Page size, 1–100."""
+  first: Int = 20
+  sortOrder: SortOrder = DESC
+
+  """Inclusive lower bound on createdAt."""
+  startDate: DateTime
+  type: TransactionType
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+}
+
+type User {
+  createdAt: DateTime!
+  email: String!
+  id: ID!
+}
