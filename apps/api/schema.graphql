@@ -60,8 +60,29 @@ input LoginInput {
 
 type Mutation {
   createAccount(input: CreateAccountInput): Account!
+
+  """Increases the account balance."""
+  creditAccount(input: PostTransactionInput!): Transaction!
+
+  """
+  Decreases the account balance. Fails with INSUFFICIENT_FUNDS on overdraft.
+  """
+  debitAccount(input: PostTransactionInput!): Transaction!
   login(input: LoginInput!): AuthPayload!
   register(input: RegisterInput!): AuthPayload!
+}
+
+input PostTransactionInput {
+  accountId: ID!
+
+  """Positive amount with at most 2 decimals, as a string: "150.25"."""
+  amount: Decimal!
+  description: String
+
+  """
+  Client-generated key (e.g. a UUID). Retrying with the same key returns the original transaction instead of posting twice.
+  """
+  idempotencyKey: String
 }
 
 type Query {
@@ -81,6 +102,24 @@ input RegisterInput {
 
   """8–128 characters."""
   password: String!
+}
+
+"""A posted, immutable ledger entry."""
+type Transaction {
+  accountId: ID!
+  amount: Decimal!
+
+  """Account balance right after this entry."""
+  balanceAfter: Decimal!
+  createdAt: DateTime!
+  description: String!
+  id: ID!
+  type: TransactionType!
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
 }
 
 type User {
