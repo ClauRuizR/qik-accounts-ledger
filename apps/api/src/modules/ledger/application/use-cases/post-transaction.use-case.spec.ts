@@ -3,14 +3,16 @@ import {
   InMemoryLedgerUnitOfWork,
 } from '../../../../test-support/fakes.js';
 import type { Account } from '../../../accounts/domain/account.js';
-import { LedgerEvents } from '../ports/ledger-events.js';
+import { LedgerEvents, type PostingCommitted } from '../ports/ledger-events.js';
 import {
   type PostTransactionCommand,
   PostTransactionUseCase,
 } from './post-transaction.use-case.js';
 
 class SpyLedgerEvents extends LedgerEvents {
-  readonly postingCommitted = vi.fn((_accountId: string) => Promise.resolve());
+  readonly postingCommitted = vi.fn((_event: PostingCommitted) =>
+    Promise.resolve(),
+  );
 }
 
 describe('PostTransactionUseCase', () => {
@@ -61,7 +63,10 @@ describe('PostTransactionUseCase', () => {
 
     it('notifies listeners after commit', async () => {
       await post({ type: 'CREDIT' });
-      expect(events.postingCommitted).toHaveBeenCalledWith(account.id);
+      expect(events.postingCommitted).toHaveBeenCalledWith({
+        accountId: account.id,
+        version: 1,
+      });
     });
 
     it('still succeeds when a listener fails (posting is already committed)', async () => {

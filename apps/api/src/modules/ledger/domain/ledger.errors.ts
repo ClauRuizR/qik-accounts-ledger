@@ -20,3 +20,18 @@ export class IdempotencyConflictError extends DomainError {
     );
   }
 }
+
+export class InvalidDateRangeError extends DomainError {
+  constructor() {
+    super(
+      ErrorCode.INVALID_DATE_RANGE,
+      'startDate must be before or equal to endDate',
+    );
+  }
+}
+
+export class InvalidCursorError extends DomainError {
+  constructor() {
+    super(ErrorCode.INVALID_CURSOR, 'Invalid pagination cursor');
+  }
+}

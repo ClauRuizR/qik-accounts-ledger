@@ -7,34 +7,49 @@ import {
 } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { DataSource } from 'typeorm';
+import { CacheStore } from '../../common/cache/cache-store.js';
 
 export class HealthStatusDto {
-  status!: 'ok' | 'degraded';
+  status!: 'ok' | 'degraded' | 'down';
   database!: 'up' | 'down';
+  /** Optional dependency: when down the API keeps working without the cache. */
+  redis!: 'up' | 'down';
 }
 
 @ApiTags('health')
 @Public()
 @Controller('health')
 export class HealthController {
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly cache: CacheStore,
+  ) {}
 
   @Get()
   @ApiOkResponse({
     description: 'All dependencies reachable',
     type: HealthStatusDto,
   })
-  @ApiServiceUnavailableResponse({ description: 'A dependency is unreachable' })
+  @ApiServiceUnavailableResponse({ description: 'PostgreSQL is unreachable' })
   async check(
     @Res({ passthrough: true }) res: Response,
   ): Promise<HealthStatusDto> {
-    const database = await this.dataSource
-      .query('SELECT 1')
-      .then(() => 'up' as const)
-      .catch(() => 'down' as const);
+    const [database, redis] = await Promise.all([
+      this.dataSource
+        .query('SELECT 1')
+        .then(() => 'up' as const)
+        .catch(() => 'down' as const),
+      this.cache
+        .isHealthy()
+        .then((ok) => (ok ? ('up' as const) : ('down' as const))),
+    ]);
 
-    const healthy = database === 'up';
-    res.status(healthy ? HttpStatus.OK : HttpStatus.SERVICE_UNAVAILABLE);
-    return { status: healthy ? 'ok' : 'degraded', database };
+    // PostgreSQL is required (503 without it); Redis is an optional accelerator.
+    res.status(
+      database === 'up' ? HttpStatus.OK : HttpStatus.SERVICE_UNAVAILABLE,
+    );
+    const status =
+      database === 'down' ? 'down' : redis === 'down' ? 'degraded' : 'ok';
+    return { status, database, redis };
   }
 }

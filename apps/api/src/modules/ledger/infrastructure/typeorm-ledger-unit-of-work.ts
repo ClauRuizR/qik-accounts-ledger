@@ -11,12 +11,8 @@ import {
 import { IdempotencyConflictError } from '../domain/ledger.errors.js';
 import type { LedgerEntry, NewLedgerEntry } from '../domain/ledger-entry.js';
 import { toDomainEntry } from './ledger-entry.mapper.js';
+import { ENTRY_COLUMNS } from './ledger-entry.sql.js';
 import { LedgerEntryOrmEntity } from './ledger-entry.orm-entity.js';
-
-/** Columns aliased to the LedgerEntry shape; NUMERIC/bigint stay strings. */
-const ENTRY_COLUMNS = `id, seq::text AS seq, account_id AS "accountId", type, amount,
-  balance_after AS "balanceAfter", description, idempotency_key AS "idempotencyKey",
-  created_at AS "createdAt"`;
 
 /** Upper bound on how long a posting waits for another posting's row lock. */
 const LOCK_TIMEOUT = '5s';
@@ -70,8 +66,8 @@ class TypeOrmPostingTransaction implements PostingTransaction {
     }
   }
 
-  async updateBalance(accountId: string, balance: string): Promise<void> {
-    await this.manager
+  async updateBalance(accountId: string, balance: string): Promise<number> {
+    const result = await this.manager
       .createQueryBuilder()
       .update(AccountOrmEntity)
       .set({
@@ -80,7 +76,10 @@ class TypeOrmPostingTransaction implements PostingTransaction {
         updatedAt: () => 'now()',
       })
       .where('id = :accountId', { accountId })
+      .returning('version')
       .execute();
+    const [row] = result.raw as { version: number }[];
+    return row.version;
   }
 }
 

@@ -48,11 +48,13 @@ export class AccountsResolver {
     return this.getAccountBalanceUseCase.execute(user.id, accountId);
   }
 
+  // `input` is declared optional rather than `| null`: a union type emits `Object` as
+  // design:type, which makes the global ValidationPipe silently skip validation.
   @Mutation(() => AccountType)
   async createAccount(
     @CurrentUser() user: AuthenticatedUser,
     @Args('input', { type: () => CreateAccountInput, nullable: true })
-    input: CreateAccountInput | null,
+    input?: CreateAccountInput,
   ): Promise<AccountType> {
     const account = await this.createAccountUseCase.execute({
       userId: user.id,

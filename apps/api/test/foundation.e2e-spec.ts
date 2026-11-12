@@ -10,7 +10,7 @@ describe('Foundation (e2e)', () => {
     t = await createTestApp();
   });
   beforeEach(async () => {
-    await resetDatabase(t.dataSource);
+    await resetDatabase(t.dataSource, t.cache);
   });
   afterAll(async () => {
     await t.close();
@@ -18,7 +18,7 @@ describe('Foundation (e2e)', () => {
 
   it('GET /health reports the database as up', async () => {
     const res = await request(t.http).get('/health').expect(200);
-    expect(res.body).toEqual({ status: 'ok', database: 'up' });
+    expect(res.body).toEqual({ status: 'ok', database: 'up', redis: 'up' });
   });
 
   it('serves the GraphQL endpoint', async () => {

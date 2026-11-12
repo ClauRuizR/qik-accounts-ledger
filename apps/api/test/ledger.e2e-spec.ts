@@ -111,7 +111,7 @@ describe('Ledger (e2e, PostgreSQL)', () => {
     t = await createTestApp();
   });
   beforeEach(async () => {
-    await resetDatabase(t.dataSource);
+    await resetDatabase(t.dataSource, t.cache);
     user = await registerUser(t.http);
   });
   afterAll(async () => {

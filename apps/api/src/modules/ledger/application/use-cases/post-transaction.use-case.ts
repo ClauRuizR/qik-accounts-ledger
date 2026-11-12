@@ -75,7 +75,7 @@ export class PostTransactionUseCase {
           ) {
             throw new IdempotencyConflictError();
           }
-          return { entry: existing, replayed: true };
+          return { entry: existing, replayed: true, version: account.version };
         }
       }
 
@@ -92,17 +92,21 @@ export class PostTransactionUseCase {
         description,
         idempotencyKey,
       });
-      await tx.updateBalance(account.id, newBalance.toString());
-      return { entry, replayed: false };
+      const version = await tx.updateBalance(account.id, newBalance.toString());
+      return { entry, replayed: false, version };
     });
 
-    if (!result.replayed) await this.notifyCommitted(command.accountId);
-    return result;
+    if (!result.replayed)
+      await this.notifyCommitted(command.accountId, result.version);
+    return { entry: result.entry, replayed: result.replayed };
   }
 
-  private async notifyCommitted(accountId: string): Promise<void> {
+  private async notifyCommitted(
+    accountId: string,
+    version: number,
+  ): Promise<void> {
     try {
-      await this.events.postingCommitted(accountId);
+      await this.events.postingCommitted({ accountId, version });
     } catch (error) {
       // The posting is committed; a stale derived view must not fail the request.
       this.logger.warn(

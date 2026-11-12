@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CacheModule } from './common/cache/cache.module.js';
 import { AppGraphQLModule } from './common/graphql/graphql.module.js';
 import { ConfigModule } from './config/config.module.js';
 import { DatabaseModule } from './database/database.module.js';
@@ -11,6 +12,7 @@ import { LedgerModule } from './modules/ledger/ledger.module.js';
   imports: [
     ConfigModule,
     DatabaseModule,
+    CacheModule,
     AppGraphQLModule,
     HealthModule,
     AuthModule,

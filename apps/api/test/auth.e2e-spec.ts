@@ -17,7 +17,7 @@ describe('Authentication (e2e)', () => {
     t = await createTestApp();
   });
   beforeEach(async () => {
-    await resetDatabase(t.dataSource);
+    await resetDatabase(t.dataSource, t.cache);
   });
   afterAll(async () => {
     await t.close();

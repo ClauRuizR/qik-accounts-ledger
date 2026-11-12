@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { AuthenticatedUser } from '../common/auth/authenticated-user.js';
+import { CacheStore } from '../common/cache/cache-store.js';
 import { Account } from '../modules/accounts/domain/account.js';
 import { AccountNumberTakenError } from '../modules/accounts/domain/account.errors.js';
 import {
@@ -185,7 +186,7 @@ export class InMemoryLedgerUnitOfWork extends LedgerUnitOfWork {
             updatedAt: new Date(),
           }),
         );
-        return Promise.resolve();
+        return Promise.resolve(props.version + 1);
       },
     };
     try {
@@ -196,5 +197,23 @@ export class InMemoryLedgerUnitOfWork extends LedgerUnitOfWork {
       this.entries.splice(0, this.entries.length, ...entriesSnapshot);
       throw error;
     }
+  }
+}
+
+export class InMemoryCacheStore extends CacheStore {
+  readonly store = new Map<string, string>();
+  readonly set = vi.fn((key: string, value: string, _ttl: number) => {
+    this.store.set(key, value);
+    return Promise.resolve();
+  });
+  get(key: string): Promise<string | null> {
+    return Promise.resolve(this.store.get(key) ?? null);
+  }
+  delete(key: string): Promise<void> {
+    this.store.delete(key);
+    return Promise.resolve();
+  }
+  isHealthy(): Promise<boolean> {
+    return Promise.resolve(true);
   }
 }

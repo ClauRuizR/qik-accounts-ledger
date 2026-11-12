@@ -17,8 +17,8 @@ export interface PostingTransaction {
     key: string,
   ): Promise<LedgerEntry | null>;
   insertEntry(entry: NewLedgerEntry): Promise<LedgerEntry>;
-  /** Sets the new balance and bumps the account version. */
-  updateBalance(accountId: string, balance: string): Promise<void>;
+  /** Sets the new balance, bumps the account version and returns the new version. */
+  updateBalance(accountId: string, balance: string): Promise<number>;
 }
 
 /**

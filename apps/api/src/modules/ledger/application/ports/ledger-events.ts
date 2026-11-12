@@ -1,15 +1,14 @@
-/**
- * Notified after a posting has been committed. Used to keep derived read
- * models (e.g. cached summaries) fresh. Must never be called inside the
- * database transaction, and failures must not affect the posting result.
- */
-export abstract class LedgerEvents {
-  abstract postingCommitted(accountId: string): Promise<void>;
+export interface PostingCommitted {
+  accountId: string;
+  /** Account version after the posting. */
+  version: number;
 }
 
-/** Default implementation until a subscriber (cache) is registered. */
-export class NoopLedgerEvents extends LedgerEvents {
-  postingCommitted(): Promise<void> {
-    return Promise.resolve();
-  }
+/**
+ * Notified after a posting has been committed. Used to keep derived read
+ * models (e.g. cached summaries) tidy. Never called inside the database
+ * transaction; failures must not affect the posting result.
+ */
+export abstract class LedgerEvents {
+  abstract postingCommitted(event: PostingCommitted): Promise<void>;
 }

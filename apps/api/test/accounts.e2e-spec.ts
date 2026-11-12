@@ -41,7 +41,7 @@ describe('Accounts (e2e)', () => {
     t = await createTestApp();
   });
   beforeEach(async () => {
-    await resetDatabase(t.dataSource);
+    await resetDatabase(t.dataSource, t.cache);
     alice = await registerUser(t.http);
     bob = await registerUser(t.http);
   });
