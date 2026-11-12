@@ -13,5 +13,14 @@ export default defineConfig({
     fileParallelism: false,
     testTimeout: 30_000,
     hookTimeout: 60_000,
+    coverage: {
+      include: ['src/**/*.ts'],
+      exclude: [
+        'src/**/*.spec.ts',
+        'src/test-support/**',
+        'src/main.ts',
+        'src/database/data-source.ts',
+      ],
+    },
   },
 });

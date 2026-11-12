@@ -78,6 +78,7 @@ export function TransactionHistoryScreen({ route }: AppScreenProps<'TransactionH
         </>
       ) : (
         <FlatList
+          testID="transaction-list"
           data={transactions}
           keyExtractor={(t) => t.id}
           ListHeaderComponent={header}

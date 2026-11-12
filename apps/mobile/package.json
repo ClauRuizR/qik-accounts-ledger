@@ -38,7 +38,8 @@
     "format:check": "prettier --check \"App.tsx\" \"src/**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage"
   },
   "private": true,
   "jest": {
@@ -49,6 +50,13 @@
     "testPathIgnorePatterns": [
       "/node_modules/",
       "/dist/"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.{ts,tsx}",
+      "!src/test-utils/**",
+      "!src/**/__tests__/**",
+      "!src/navigation/types.ts",
+      "!src/types/**"
     ]
   }
 }

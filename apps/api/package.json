@@ -25,7 +25,8 @@
     "migration:run": "nest build && typeorm -d dist/database/data-source.js migration:run",
     "migration:revert": "nest build && typeorm -d dist/database/data-source.js migration:revert",
     "migration:show": "nest build && typeorm -d dist/database/data-source.js migration:show",
-    "test:all": "npm run test && npm run test:e2e"
+    "test:all": "npm run test && npm run test:e2e",
+    "test:cov:e2e": "vitest run --config ./vitest.config.e2e.ts --coverage"
   },
   "dependencies": {
     "@apollo/server": "^5.5.2",
