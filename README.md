@@ -613,7 +613,13 @@ errors aren't logged as errors.
   operation to close an account.
 - **Summary on a cache miss** aggregates every entry of the account (`SUM`, `COUNT`), which is
   fine at this scale. Very large ledgers would want running totals stored on the account.
-- **`totalCount`** in history uses `COUNT(*)` with the same filters.
+- **`totalCount`** in history uses `COUNT(*)` with the same filters, as a separate query
+  from the page. If a posting commits between the two, the count in that one response can
+  be off by one.
+- **Lock timeout:** a posting that waits more than 5 s for another posting's account lock is
+  aborted with nothing written, and the client receives a generic `INTERNAL_ERROR` rather
+  than a dedicated retryable code. Retrying with the same idempotency key (as the mobile app
+  does) is safe.
 - **Mobile date filters** are typed text (`YYYY-MM-DD`, local calendar days, validated)
   rather than a native date picker.
 - **Verified platforms:**
